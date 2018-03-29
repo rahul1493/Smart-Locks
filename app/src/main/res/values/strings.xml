@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Smart Lock</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
+    <string name="userid">UserID</string>
+    <string name="open" />
+    <string name="close" />
+    <string name="generate">Generate</string>
+    <string name="lock">Lock</string>
+    <string name="unlock">UnLock</string>
+    <string name="create">Create</string>
+</resources>
