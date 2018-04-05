@@ -29,13 +29,17 @@ dependencies {
     compile 'com.android.support:appcompat-v7:26.+'
     compile ('com.amazonaws:aws-android-sdk-auth-ui:2.6.+@aar') { transitive = true; }
 
+    compile ('com.amazonaws:aws-android-sdk-mobile-client:2.6.+@aar') { transitive = true; }
+
+    implementation 'com.amazonaws:aws-android-sdk-ddb-mapper:2.6.+'
+
 
     compile 'com.amazonaws:aws-android-sdk-core:2.6.0'
     compile 'com.amazonaws:aws-android-sdk-auth-core:2.6.0@aar'
     compile 'com.amazonaws:aws-android-sdk-pinpoint:2.6.0'
     compile 'com.amazonaws:aws-android-sdk-auth-ui:2.6.0@aar'
     compile 'com.amazonaws:aws-android-sdk-auth-userpools:2.6.0@aar'
-    compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.6.0'
+    compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.6.8'
 
     compile 'com.amazonaws:aws-android-sdk-core:2.6.+'
     compile 'com.amazonaws:aws-android-sdk-s3:2.6.+'
@@ -47,4 +51,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
+
+    compile 'com.basgeekball:awesome-validation:1.3'
 }

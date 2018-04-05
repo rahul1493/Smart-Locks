@@ -37,10 +37,10 @@
         android:layout_marginTop="27dp"
         android:ems="10"
         android:hint="@string/password"
-        android:inputType="textPersonName" />
+        android:inputType="textPassword" />
 
     <Button
-        android:id="@+id/login"
+        android:id="@+id/create"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/editText2"

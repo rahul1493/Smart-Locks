@@ -9,4 +9,9 @@
     <string name="lock">Lock</string>
     <string name="unlock">UnLock</string>
     <string name="create">Create</string>
+    <string name="username">Username</string>
+    <string name="verification_code">Verification Code</string>
+    <string name="passworderror" >Valid Password of minimum 6 length is required</string>
+
+    <string name="usernameerror" >Valid Username is required</string>
 </resources>
