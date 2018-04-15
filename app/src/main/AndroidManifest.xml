@@ -30,6 +30,8 @@
         <activity android:name=".HomeActivityOther"
             android:screenOrientation="portrait"> </activity>
         <activity android:name=".Logout"> </activity>
+        <activity android:name=".SingleTask"
+            android:parentActivityName=".AllUsers"> </activity>
         <activity android:name=".SignUpConfirm"> </activity>
         <activity android:name=".CreateUser"
             android:parentActivityName=".HomeActivity"> </activity>

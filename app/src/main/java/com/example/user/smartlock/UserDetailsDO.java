@@ -18,6 +18,16 @@ public class UserDetailsDO {
     private String _emailid;
     private String _timeofcreation;
 
+
+    public UserDetailsDO() {
+    }
+
+    public UserDetailsDO(String name, String timeofcreation) {
+        this._username = name;
+        this._timeofcreation = timeofcreation;
+
+    }
+
     @DynamoDBHashKey(attributeName = "username")
     @DynamoDBAttribute(attributeName = "username")
     public String getUsername() {
