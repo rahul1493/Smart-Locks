@@ -70,19 +70,7 @@ public class SingleTask extends AppCompatActivity{
         final CognitoUser user = AppHelper.getPool().getCurrentUser();
 
 
-        remove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-
-
-                Log.d("msg", String.valueOf(user));
-
-
-                user.deleteUser(handler);
-
-            }
-        });
     }
 
     GenericHandler handler = new GenericHandler() {

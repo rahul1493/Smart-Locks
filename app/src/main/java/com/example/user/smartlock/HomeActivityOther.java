@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,6 +30,9 @@ import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by user on 4/4/18.
  */
@@ -39,6 +43,7 @@ public class HomeActivityOther extends AppCompatActivity {
     private DrawerLayout Drawer;
     private ActionBarDrawerToggle Toggle;
     Toolbar toolbar;
+    static int flag;
 
     Button unlock,lock;
 
@@ -129,6 +134,8 @@ public class HomeActivityOther extends AppCompatActivity {
         mqttManager = new AWSIotMqttManager(clientId, CUSTOMER_SPECIFIC_ENDPOINT);
 
 
+
+//unlocking the lock
         try {
 
             Log.d("msg", "Status = ");
@@ -149,6 +156,66 @@ public class HomeActivityOther extends AppCompatActivity {
                             else if (status == AWSIotMqttClientStatus.Connected) {
 
                                 Log.d("Status","Connected" );
+
+                                try {
+
+                                    final String topic = "$aws/things/PubSub/shadow/update";
+
+                                    Log.d("msg", "2");
+
+                                    Log.d("topic", "topic = " + topic);
+
+                                    mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0,
+                                            new AWSIotMqttNewMessageCallback() {
+
+                                                @Override
+                                                public void onMessageArrived(final String topic, final byte[] data) {
+                                                    Log.d("message", "inside");
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            try {
+                                                                String message = new String(data, "UTF-8");
+
+                                                                Log.d("message", message);
+
+
+                                                                try {
+                                                                    JSONObject reader = new JSONObject(message);
+                                                                    JSONObject sys  = reader.getJSONObject("state");
+                                                                    JSONObject sys1  = sys.getJSONObject("desired");
+                                                                    String status = sys1.getString("message");
+                                                                    Log.d("message", status);
+                                                                    if(status == "unlock"){
+
+                                                                        flag=1;
+                                                                    }
+                                                                } catch (JSONException e) {
+                                                                    e.printStackTrace();
+                                                                }
+
+                                                                String hi="abcd";
+
+
+
+
+
+
+                                                                Log.d("msg", "1");
+
+                                                            } catch (UnsupportedEncodingException e) {
+                                                                Log.d("error", "Message encoding error.", e);
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                } catch (Exception e) {
+                                    Log.e("error", "Subscription error.", e);
+                                }
+
+
+
 
                             }
                             else if (status == AWSIotMqttClientStatus.Reconnecting) {
@@ -173,16 +240,27 @@ public class HomeActivityOther extends AppCompatActivity {
 
         }
 
+
+
+        if(flag==1)
+            unlock.setEnabled(false);
+
+
         unlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
 
                 final String topic = "$aws/things/PubSub/shadow/update";
                 final String msg = "{\"state\": {\"desired\": {\"message\": \"unlock\" }}}";
 
                 try {
                     mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
+
                     insertintolog();
+
+
+
                 } catch (Exception e) {
                     Log.d("Status", "Publish error.", e);
                 }
@@ -191,19 +269,7 @@ public class HomeActivityOther extends AppCompatActivity {
         });
 
 
-
     }
-
-    @Override
-    public  boolean onOptionsItemSelected(MenuItem item){
-
-        if(Toggle.onOptionsItemSelected(item)){
-            return true;
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     public void insertintolog() {
         final LogsDO logdata = new LogsDO();
         CognitoUser user = AppHelper.getPool().getCurrentUser();
@@ -221,14 +287,30 @@ public class HomeActivityOther extends AppCompatActivity {
 
         String currentDateTimeString = dateFormat.format(date);
 
+
+
         logdata.setTimestamp(currentDateTimeString);
 
         new Thread(new Runnable() {
             @Override
             public void run() {
                 dynamoDBMapper.save(logdata);
+
                 // Item saved
             }
         }).start();
     }
+
+
+    @Override
+    public  boolean onOptionsItemSelected(MenuItem item){
+
+        if(Toggle.onOptionsItemSelected(item)){
+            return true;
+
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 }

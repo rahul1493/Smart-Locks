@@ -35,6 +35,10 @@ import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by user on 19/3/18.
  */
@@ -61,6 +65,7 @@ public class HomeActivity extends AppCompatActivity {
 
     AWSIotMqttManager mqttManager;
     String clientId;
+    static int flag;
 
     CognitoCachingCredentialsProvider credentialsProvider;
 
@@ -189,6 +194,27 @@ public class HomeActivity extends AppCompatActivity {
                                                                 Log.d("message", message);
 
 
+                                                                try {
+                                                                    JSONObject reader = new JSONObject(message);
+                                                                    JSONObject sys  = reader.getJSONObject("state");
+                                                                    JSONObject sys1  = sys.getJSONObject("desired");
+                                                                    String status = sys1.getString("message");
+                                                                    Log.d("message", status);
+                                                                    if(status == "unlock"){
+
+                                                                     flag=1;
+                                                                    }
+                                                                } catch (JSONException e) {
+                                                                    e.printStackTrace();
+                                                                }
+
+                                                                String hi="abcd";
+
+
+
+
+
+
                                                                 Log.d("msg", "1");
 
                                                             } catch (UnsupportedEncodingException e) {
@@ -230,6 +256,8 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
+if(flag==1)
+    unlock.setEnabled(false);
 
 
         unlock.setOnClickListener(new View.OnClickListener() {
