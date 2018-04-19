@@ -114,6 +114,7 @@ public class CreateUser extends AppCompatActivity{
         Intent intent = new Intent(this, SignUpConfirm.class);
         intent.putExtra("source","signup");
         intent.putExtra("name", username.getText().toString());
+        intent.putExtra("email", emailid.getText().toString());
         intent.putExtra("destination", cognitoUserCodeDeliveryDetails.getDestination());
         intent.putExtra("deliveryMed", cognitoUserCodeDeliveryDetails.getDeliveryMedium());
         intent.putExtra("attribute", cognitoUserCodeDeliveryDetails.getAttributeName());

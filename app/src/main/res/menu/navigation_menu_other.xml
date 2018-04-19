@@ -6,6 +6,10 @@
             android:title="Generate Pattern"
             android:icon="@drawable/ic_mode_edit_black_24dp"/>
 
+        <item android:id="@+id/changepassword"
+            android:title="Change Password"
+            android:icon="@drawable/ic_fingerprint_black_24dp"/>
+
 
         <item android:id="@+id/logout"
             android:title="Logout"

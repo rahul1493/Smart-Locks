@@ -23,6 +23,8 @@
             android:parentActivityName=".HomeActivity"> </activity>
         <activity android:name=".GeneratePattern"
             android:parentActivityName=".HomeActivity"> </activity>
+        <activity android:name=".GeneratePatternOther"
+            android:parentActivityName=".HomeActivityOther"> </activity>
         <activity android:name=".Notification"
             android:parentActivityName=".HomeActivity"> </activity>
         <activity android:name=".HomeActivity"
@@ -33,6 +35,10 @@
         <activity android:name=".SingleTask"
             android:parentActivityName=".AllUsers"> </activity>
         <activity android:name=".SignUpConfirm"> </activity>
+        <activity android:name=".ChangePassword"
+            android:parentActivityName=".HomeActivity"> </activity>
+        <activity android:name=".ChangePasswordOther"
+            android:parentActivityName=".HomeActivityOther"> </activity>
         <activity android:name=".CreateUser"
             android:parentActivityName=".HomeActivity"> </activity>
 

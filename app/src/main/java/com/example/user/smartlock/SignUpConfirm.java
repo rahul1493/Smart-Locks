@@ -25,7 +25,7 @@ import java.util.Date;
 
 public class SignUpConfirm extends AppCompatActivity {
 
-    private String userName;
+    private String userName,emailid;
     private EditText username;
     private EditText confCode;
     Button confirm;
@@ -55,7 +55,7 @@ public class SignUpConfirm extends AppCompatActivity {
 
             userName = extras.getString("name");
 
-            userName = extras.getString("name");
+            emailid = extras.getString("email");
             username = (EditText) findViewById(R.id.editText3);
             username.setText(userName);
 
@@ -102,7 +102,7 @@ public class SignUpConfirm extends AppCompatActivity {
 
         userdata.setUsername(userName);
 
-        userdata.setEmailid("pratik.s.wagh95@gmail.com");
+        userdata.setEmailid(emailid);
 
         String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
 

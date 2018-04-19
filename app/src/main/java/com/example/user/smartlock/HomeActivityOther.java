@@ -103,9 +103,14 @@ public class HomeActivityOther extends AppCompatActivity {
                                 break;
 
 
-                            case R.id.logout:
-                                Intent f = new Intent(HomeActivityOther.this, Logout.class);
+                            case R.id.changepassword:
+                                Intent f = new Intent(HomeActivityOther.this, ChangePasswordOther.class);
                                 startActivity(f);
+                                break;
+
+                            case R.id.logout:
+                                Intent g = new Intent(HomeActivityOther.this, Logout.class);
+                                startActivity(g);
                                 break;
                         }
 
