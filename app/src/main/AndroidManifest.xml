@@ -35,6 +35,9 @@
         <activity android:name=".SignUpConfirm"> </activity>
         <activity android:name=".CreateUser"
             android:parentActivityName=".HomeActivity"> </activity>
+
+        <activity android:name=".Unlock"
+            android:parentActivityName=".HomeActivity"> </activity>
     </application>
 
 

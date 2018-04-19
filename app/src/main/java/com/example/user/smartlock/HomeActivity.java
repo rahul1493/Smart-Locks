@@ -3,17 +3,37 @@ package com.example.user.smartlock;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
+import java.io.UnsupportedEncodingException;
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
+
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
+import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
 /**
  * Created by user on 19/3/18.
@@ -25,10 +45,35 @@ public class HomeActivity extends AppCompatActivity {
     private DrawerLayout Drawer;
     private ActionBarDrawerToggle Toggle;
     Toolbar toolbar;
+    Button unlock,lock;
+    DynamoDBMapper dynamoDBMapper;
+
+    // Customer specific IoT endpoint
+    // AWS Iot CLI describe-endpoint call returns: XXXXXXXXXX.iot.<region>.amazonaws.com,
+    private static final String CUSTOMER_SPECIFIC_ENDPOINT = "a1kw7adkqhyy7v.iot.us-east-2.amazonaws.com";
+
+    // Cognito pool ID. For this app, pool needs to be unauthenticated pool with
+    // AWS IoT permissions.
+    private static final String COGNITO_POOL_ID = "us-east-2:cbd064f2-8dfd-4bf6-89a6-341e4d22d699";
+
+    // Region of AWS IoT
+    private static final Regions MY_REGION = Regions.US_EAST_2;
+
+    AWSIotMqttManager mqttManager;
+    String clientId;
+
+    CognitoCachingCredentialsProvider credentialsProvider;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // Instantiate a AmazonDynamoDBMapperClient
+        AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
+        this.dynamoDBMapper = DynamoDBMapper.builder()
+                .dynamoDBClient(dynamoDBClient)
+                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                .build();
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -41,6 +86,7 @@ public class HomeActivity extends AppCompatActivity {
         Drawer=(DrawerLayout) findViewById(R.id.drawerlayout);
         NavigationView navigationView=findViewById(R.id.nav_view);
 
+        unlock=(Button) findViewById(R.id.unlock);
 
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -64,10 +110,6 @@ public class HomeActivity extends AppCompatActivity {
                                 Intent d = new Intent(HomeActivity.this, GeneratePattern.class);
                                 startActivity(d);
                                 break;
-                            case R.id.notification:
-                                Intent e = new Intent(HomeActivity.this, Notification.class);
-                                startActivity(e);
-                                break;
 
                             case R.id.logout:
                                 Intent f = new Intent(HomeActivity.this, Logout.class);
@@ -87,6 +129,162 @@ public class HomeActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
+        clientId = UUID.randomUUID().toString();
+
+
+        // Initialize the AWS Cognito credentials provider
+        credentialsProvider = new CognitoCachingCredentialsProvider(
+                getApplicationContext(), // context
+                COGNITO_POOL_ID, // Identity Pool ID
+                MY_REGION // Region
+        );
+
+        // MQTT Client
+        mqttManager = new AWSIotMqttManager(clientId, CUSTOMER_SPECIFIC_ENDPOINT);
+
+
+
+//unlocking the lock
+        try {
+
+            Log.d("msg", "Status = ");
+            mqttManager.connect(credentialsProvider, new AWSIotMqttClientStatusCallback() {
+                @Override
+                public void onStatusChanged(final AWSIotMqttClientStatus status,
+                                            final Throwable throwable) {
+                    Log.d("Status", "Status = " + String.valueOf(status));
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (status == AWSIotMqttClientStatus.Connecting) {
+
+                                Log.d("Status","Connecting..." );
+
+                            }
+                            else if (status == AWSIotMqttClientStatus.Connected) {
+
+                                Log.d("Status","Connected" );
+
+                                try {
+
+                                    final String topic = "$aws/things/PubSub/shadow/update";
+
+                                    Log.d("msg", "2");
+
+                                    Log.d("topic", "topic = " + topic);
+
+                                    mqttManager.subscribeToTopic(topic, AWSIotMqttQos.QOS0,
+                                            new AWSIotMqttNewMessageCallback() {
+
+                                                @Override
+                                                public void onMessageArrived(final String topic, final byte[] data) {
+                                                    Log.d("message", "inside");
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            try {
+                                                                String message = new String(data, "UTF-8");
+
+                                                                Log.d("message", message);
+
+
+                                                                Log.d("msg", "1");
+
+                                                            } catch (UnsupportedEncodingException e) {
+                                                                Log.d("error", "Message encoding error.", e);
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                } catch (Exception e) {
+                                    Log.e("error", "Subscription error.", e);
+                                }
+
+
+
+
+                            }
+                            else if (status == AWSIotMqttClientStatus.Reconnecting) {
+                                if (throwable != null) {
+                                    Log.d("Status", "Connection error.", throwable);
+                                }
+
+                            }
+                            else if (status == AWSIotMqttClientStatus.ConnectionLost) {
+                                if (throwable != null) {
+                                    Log.d("Status", "Connection error.", throwable);
+                                    throwable.printStackTrace();
+                                }
+
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (final Exception e) {
+            Log.e("error", "Connection error." + e.getMessage());
+
+        }
+
+
+
+
+
+        unlock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                final String topic = "$aws/things/PubSub/shadow/update";
+                final String msg = "{\"state\": {\"desired\": {\"message\": \"unlock\" }}}";
+
+                try {
+                    mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
+
+                    insertintolog();
+
+
+
+                } catch (Exception e) {
+                    Log.d("Status", "Publish error.", e);
+                }
+
+            }
+        });
+
+
+    }
+    public void insertintolog() {
+        final LogsDO logdata = new LogsDO();
+        CognitoUser user = AppHelper.getPool().getCurrentUser();
+
+        Log.d("msg", user.toString());
+
+        String Username = user.getUserId();
+
+        logdata.setUserId(Username);
+
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        // System.out.println(dateFormat.format(date));
+
+        String currentDateTimeString = dateFormat.format(date);
+
+
+
+        logdata.setTimestamp(currentDateTimeString);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                dynamoDBMapper.save(logdata);
+
+                // Item saved
+            }
+        }).start();
     }
 
     @Override
@@ -98,4 +296,6 @@ public class HomeActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 }

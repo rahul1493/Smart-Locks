@@ -20,23 +20,14 @@
             android:background="@color/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
 
-        <Button
-            android:id="@+id/lock"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/unlock"
-            android:layout_alignStart="@+id/unlock"
-            android:layout_marginBottom="15dp"
-            android:text="@string/lock" />
 
         <Button
             android:id="@+id/unlock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="222dp"
-            android:text="@string/unlock" />
+            android:layout_centerVertical="true"
+            android:text="Unlock" />
 
 
     </RelativeLayout>

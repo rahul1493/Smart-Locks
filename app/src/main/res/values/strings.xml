@@ -14,4 +14,5 @@
     <string name="passworderror" >Valid Password of minimum 6 length is required</string>
 
     <string name="usernameerror" >Valid Username is required</string>
+    <string name="emailiderror" >Valid Email-ID is required</string>
 </resources>

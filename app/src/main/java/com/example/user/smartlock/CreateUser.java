@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,7 +28,7 @@ public class CreateUser extends AppCompatActivity{
 
     Toolbar toolbar;
     Button button;
-    private EditText username,password;
+    private EditText username,password,emailid;
     private AwesomeValidation awesomeValidation;
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,7 @@ public class CreateUser extends AppCompatActivity{
 
         username= (EditText)findViewById(R.id.editText);
         password= (EditText) findViewById(R.id.editText2);
+        emailid=(EditText) findViewById(R.id.emailid);;
 
         awesomeValidation = new AwesomeValidation(ValidationStyle.BASIC);
 
@@ -49,6 +51,7 @@ public class CreateUser extends AppCompatActivity{
 
         awesomeValidation.addValidation(this, R.id.editText, ".{6,}", R.string.usernameerror);
         awesomeValidation.addValidation(this, R.id.editText2, ".{6,}", R.string.passworderror);
+        awesomeValidation.addValidation(this, R.id.emailid, Patterns.EMAIL_ADDRESS, R.string.emailiderror);
 
 
         toolbar =findViewById(R.id.toolbar);
@@ -65,7 +68,8 @@ public class CreateUser extends AppCompatActivity{
 
                 CognitoUserAttributes userAttributes = new CognitoUserAttributes();
 
-                userAttributes.addAttribute("email", "pratik.s.wagh95@gmail.com");
+
+                userAttributes.addAttribute("email", emailid.getText().toString());
 
                 AppHelper.getPool().signUpInBackground(username.getText().toString(), password.getText().toString(), userAttributes, null, signupCallback);
 

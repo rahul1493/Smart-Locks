@@ -105,10 +105,11 @@ public class AllUsers extends AppCompatActivity {
                 System.out.println(result.toString());
                 Log.d("msg",result.toString());
 
-                for (UserDetailsDO tesis : result) {
-                    System.out.println(tesis.getUsername());
+                for (UserDetailsDO user : result) {
+                    Log.d("user", String.valueOf(user));
+                    System.out.println(user.getUsername());
 
-                    System.out.println(tesis.getTimeofcreation());
+                    System.out.println(user.getTimeofcreation());
 
                 }
 

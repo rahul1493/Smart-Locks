@@ -83,7 +83,7 @@ public class SignUpConfirm extends AppCompatActivity {
         public void onSuccess() {
 
 
-            createNews();
+            createUser();
 
             Intent userActivity = new Intent(SignUpConfirm.this, HomeActivity.class);
             //userActivity.putExtra("name", username);
@@ -97,7 +97,7 @@ public class SignUpConfirm extends AppCompatActivity {
         }
     };
 
-    public void createNews() {
+    public void createUser() {
         final UserDetailsDO userdata = new UserDetailsDO();
 
         userdata.setUsername(userName);

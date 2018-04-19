@@ -2,21 +2,11 @@ package com.example.user.smartlock;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.NavigationView;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobile.client.AWSMobileClient;
@@ -24,24 +14,28 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttClientStatusCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttManager;
-import com.amazonaws.mobileconnectors.iot.AWSIotMqttNewMessageCallback;
 import com.amazonaws.mobileconnectors.iot.AWSIotMqttQos;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
+
 /**
- * Created by user on 4/4/18.
+ * Created by user on 19/4/18.
  */
 
-public class HomeActivityOther extends AppCompatActivity {
+public class Unlock extends AppCompatActivity {
 
 
-    private DrawerLayout Drawer;
-    private ActionBarDrawerToggle Toggle;
+    AWSIotMqttManager mqttManager;
+    String clientId;
+    DynamoDBMapper dynamoDBMapper;
+    Button unlock;
     Toolbar toolbar;
-
-    Button unlock,lock;
-
+    CognitoCachingCredentialsProvider credentialsProvider;
     // Customer specific IoT endpoint
     // AWS Iot CLI describe-endpoint call returns: XXXXXXXXXX.iot.<region>.amazonaws.com,
     private static final String CUSTOMER_SPECIFIC_ENDPOINT = "a1kw7adkqhyy7v.iot.us-east-2.amazonaws.com";
@@ -53,23 +47,14 @@ public class HomeActivityOther extends AppCompatActivity {
     // Region of AWS IoT
     private static final Regions MY_REGION = Regions.US_EAST_2;
 
-    AWSIotMqttManager mqttManager;
-    String clientId;
-
-    CognitoCachingCredentialsProvider credentialsProvider;
-    DynamoDBMapper dynamoDBMapper;
-
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_other);
+        setContentView(R.layout.activity_unlock);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setDisplayHomeAsUpEnabled(true);
-        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
         // Instantiate a AmazonDynamoDBMapperClient
         AmazonDynamoDBClient dynamoDBClient = new AmazonDynamoDBClient(AWSMobileClient.getInstance().getCredentialsProvider());
         this.dynamoDBMapper = DynamoDBMapper.builder()
@@ -77,43 +62,7 @@ public class HomeActivityOther extends AppCompatActivity {
                 .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
                 .build();
 
-
         unlock=(Button) findViewById(R.id.unlock);
-
-        Drawer=(DrawerLayout) findViewById(R.id.drawerlayout);
-        NavigationView navigationView=findViewById(R.id.nav_view);
-
-
-
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        int id = menuItem.getItemId();
-                        switch (id) {
-
-                            case R.id.generatepattern:
-                                Intent d = new Intent(HomeActivityOther.this, GeneratePattern.class);
-                                startActivity(d);
-                                break;
-
-
-                            case R.id.logout:
-                                Intent f = new Intent(HomeActivityOther.this, Logout.class);
-                                startActivity(f);
-                                break;
-                        }
-
-                        return true;
-                    }
-                });
-
-        Toggle=new ActionBarDrawerToggle(this,Drawer,R.string.open,R.string.close);
-
-        Drawer.addDrawerListener(Toggle);
-        Toggle.syncState();
-
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         clientId = UUID.randomUUID().toString();
 
@@ -127,7 +76,6 @@ public class HomeActivityOther extends AppCompatActivity {
 
         // MQTT Client
         mqttManager = new AWSIotMqttManager(clientId, CUSTOMER_SPECIFIC_ENDPOINT);
-
 
         try {
 
@@ -149,6 +97,8 @@ public class HomeActivityOther extends AppCompatActivity {
                             else if (status == AWSIotMqttClientStatus.Connected) {
 
                                 Log.d("Status","Connected" );
+
+
 
                             }
                             else if (status == AWSIotMqttClientStatus.Reconnecting) {
@@ -173,62 +123,27 @@ public class HomeActivityOther extends AppCompatActivity {
 
         }
 
+
         unlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                final String topic = "$aws/things/PubSub/shadow/update";
-                final String msg = "{\"state\": {\"desired\": {\"message\": \"unlock\" }}}";
+        final String topic = "$aws/things/PubSub/shadow/update";
+        final String msg = "{\"state\": {\"desired\": {\"message\": \"unlock\" }}}";
 
-                try {
-                    mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
-                    insertintolog();
-                } catch (Exception e) {
-                    Log.d("Status", "Publish error.", e);
-                }
-
-            }
-        });
+        try {
+            mqttManager.publishString(msg, topic, AWSIotMqttQos.QOS0);
 
 
 
-    }
 
-    @Override
-    public  boolean onOptionsItemSelected(MenuItem item){
 
-        if(Toggle.onOptionsItemSelected(item)){
-            return true;
-
+        } catch (Exception e) {
+            Log.d("Status", "Publish error.", e);
         }
-        return super.onOptionsItemSelected(item);
     }
 
-    public void insertintolog() {
-        final LogsDO logdata = new LogsDO();
-        CognitoUser user = AppHelper.getPool().getCurrentUser();
 
-        Log.d("msg", user.toString());
-
-        String Username = user.getUserId();
-
-        logdata.setUserId(Username);
-
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        // System.out.println(dateFormat.format(date));
-
-        String currentDateTimeString = dateFormat.format(date);
-
-        logdata.setTimestamp(currentDateTimeString);
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                dynamoDBMapper.save(logdata);
-                // Item saved
-            }
-        }).start();
+});
     }
 }
